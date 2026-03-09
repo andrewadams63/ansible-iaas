@@ -1,4 +1,11 @@
 ---
+secrets_backend: hashicorp_vault
+
+hcv_addr: "https://vault.internal.acme.com"
+hcv_auth_method: "approle"
+hcv_secrets_mount: "secret"
+hcv_secrets_path_prefix: "ansible/production"
+
 env: production
 org_name: "acme"
 datacenter: "us-east-1"

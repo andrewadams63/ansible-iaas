@@ -91,12 +91,22 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install ansible && ansible-galaxy collection install -r collections/requirements.yml -p collections/
-      - run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+      # Development defaults to ansible_vault — write password file if secret exists
+      - name: Write vault password file
+        if: env.ANSIBLE_VAULT_PASSWORD != ''
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
 
       - name: Run playbook
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
           PLAYBOOK="${{ inputs.playbook || 'site.yml' }}"
           ARGS="playbooks/$PLAYBOOK -i inventories/development/hosts.yml"
@@ -125,12 +135,22 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install ansible && ansible-galaxy collection install -r collections/requirements.yml -p collections/
-      - run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+      # Staging defaults to hashicorp_vault — vault password file not needed
+      - name: Write vault password file (fallback)
+        if: env.ANSIBLE_VAULT_PASSWORD != ''
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
 
       - name: Run playbook
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
           PLAYBOOK="${{ inputs.playbook || 'site.yml' }}"
           ARGS="playbooks/$PLAYBOOK -i inventories/staging/hosts.yml"
@@ -158,12 +178,22 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install ansible && ansible-galaxy collection install -r collections/requirements.yml -p collections/
-      - run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+      # Production defaults to hashicorp_vault — vault password file not needed
+      - name: Write vault password file (fallback)
+        if: env.ANSIBLE_VAULT_PASSWORD != ''
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
 
       - name: Run playbook
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
           PLAYBOOK="${{ inputs.playbook || 'site.yml' }}"
           ARGS="playbooks/$PLAYBOOK -i inventories/production/hosts.yml"

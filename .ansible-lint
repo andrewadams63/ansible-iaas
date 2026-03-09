@@ -1,0 +1,25 @@
+---
+# ansible-lint configuration
+# https://ansible.readthedocs.io/projects/lint/configuring/
+
+profile: production   # strict by default; loosen per rule below if needed
+
+exclude_paths:
+  - collections/ansible_collections/   # installed, not maintained here
+  - .git/
+  - .venv/
+
+# Rules to skip project-wide (document the reason for each skip)
+warn_list:
+  - no-changed-when    # many command tasks are genuinely idempotent by design
+
+skip_list:
+  # fetch_secrets.yml uses include_tasks with tags: [always] which triggers this
+  - name: "key-order[task]"
+
+# The hashi_vault lookup plugin resolves at runtime, not lint time.
+# Treat missing vault connection as a warning rather than an error.
+offline: false
+
+# Ensure loop variable names are explicit
+loop_var_prefix: "^(item|{name}_item)$"

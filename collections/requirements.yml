@@ -22,3 +22,7 @@ collections:
   # Crypto helpers (certificate management, vault interactions)
   - name: community.crypto
     version: ">=2.20.0"
+
+  # HashiCorp Vault lookups — used when secrets_backend == 'hashicorp_vault'
+  - name: community.hashi_vault
+    version: ">=6.2.0"

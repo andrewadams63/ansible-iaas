@@ -1,9 +1,24 @@
 ---
 # Variables for ALL hosts in the development environment.
 # These override role defaults but are overridden by host_vars.
+
+# ── Secrets backend ────────────────────────────────────────────────────────
+# 'ansible_vault' — secrets come from the encrypted vault.yml in this dir.
+# 'hashicorp_vault' — secrets fetched at run-time by fetch_secrets.yml pre-task.
 #
-# Secrets live in vault.yml in this same directory.
-# Reference them here as: my_var: "{{ vault_my_var }}"
+# Local testing default is ansible_vault.  Set to hashicorp_vault in CI or
+# when you have a Vault server available.
+# Override at runtime: --extra-vars secrets_backend=hashicorp_vault
+secrets_backend: ansible_vault
+
+# HCP Vault connection — only used when secrets_backend == 'hashicorp_vault'.
+# vault_addr and vault_auth_method can also be set via environment variables
+# (VAULT_ADDR, VAULT_AUTH_METHOD) which take precedence over these values.
+hcv_addr: "https://vault.internal.acme.com"
+hcv_auth_method: "approle"          # approle | token | aws_iam | ldap
+hcv_secrets_mount: "secret"         # KV v2 mount point
+hcv_secrets_path_prefix: "ansible/development"  # secrets live at <mount>/data/<prefix>/<name>
+# hcv_namespace: "admin"            # Uncomment for HCP Vault or Vault Enterprise namespaces
 
 # ── Environment metadata ───────────────────────────────────────────────────
 env: development
@@ -11,6 +26,8 @@ org_name: "acme"
 datacenter: "us-east-1"
 
 # ── Datadog ────────────────────────────────────────────────────────────────
+# Value populated by fetch_secrets.yml when secrets_backend == hashicorp_vault;
+# falls back to vault.yml when secrets_backend == ansible_vault.
 datadog_api_key: "{{ vault_datadog_api_key }}"
 datadog_site: "datadoghq.com"
 datadog_tags:

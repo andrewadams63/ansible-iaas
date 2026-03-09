@@ -4,13 +4,18 @@
 # Triggered after Terraform completes (via workflow_call from your TF repo)
 # or manually for ad-hoc provisioning runs.
 #
-# Required GitHub Secrets (set in repo Settings → Secrets and variables):
-#   ANSIBLE_VAULT_PASSWORD   — vault password for the target environment
-#   ANSIBLE_SSH_PRIVATE_KEY  — private key for the 'ansible' service account
-#   TF_STATE_BUCKET          — (optional) S3 bucket for TF state if using tf_inventory
+# Required GitHub Secrets (set in repo Settings → Secrets and variables → per environment):
 #
-# Required GitHub Variables:
-#   ANSIBLE_REMOTE_USER      — default: ansible
+#   Always required:
+#     ANSIBLE_SSH_PRIVATE_KEY  — private key for the 'ansible' service account
+#
+#   When secrets_backend == ansible_vault (development default):
+#     ANSIBLE_VAULT_PASSWORD   — decrypts the vault.yml files
+#
+#   When secrets_backend == hashicorp_vault (staging/production default):
+#     VAULT_ADDR               — e.g. https://vault.internal.acme.com
+#     VAULT_ROLE_ID            — AppRole role_id  (non-sensitive, can be a var)
+#     VAULT_SECRET_ID          — AppRole secret_id (sensitive, must be a secret)
 
 name: Provision New Infrastructure
 
@@ -97,9 +102,12 @@ jobs:
           pip install ansible
           ansible-galaxy collection install -r collections/requirements.yml -p collections/
 
+      # ansible_vault backend: write the vault password file
       - name: Write vault password file
+        if: env.ANSIBLE_VAULT_PASSWORD != ''
         run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
-        # File is in .gitignore; runner workspace is ephemeral
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.9.0
@@ -114,6 +122,13 @@ jobs:
             > inventories/${{ inputs.environment }}/tf_hosts.yml
 
       - name: Run provision playbook
+        env:
+          # HashiCorp Vault — only used when secrets_backend=hashicorp_vault
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+          # Fallback token auth (dev/test Vault servers)
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
           ARGS="playbooks/provision.yml \
             -i inventories/${{ inputs.environment }}/hosts.yml \

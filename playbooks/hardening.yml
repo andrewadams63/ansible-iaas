@@ -5,6 +5,12 @@
 - name: Harden Linux hosts
   hosts: linux
   gather_facts: true
+
+  pre_tasks:
+    - name: Fetch secrets (ansible_vault or hashicorp_vault)
+      ansible.builtin.include_tasks: pre_tasks/fetch_secrets.yml
+      tags: [always]
+
   roles:
     - role: linux_hardening
       tags: [hardening]
