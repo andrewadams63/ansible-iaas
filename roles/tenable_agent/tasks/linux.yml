@@ -1,0 +1,51 @@
+---
+- name: Download Nessus agent RPM (EL)
+  ansible.builtin.get_url:
+    url: "{{ tenable_agent_rpm_url }}"
+    dest: "{{ tenable_download_dir }}/nessus-agent.rpm"
+    mode: "0644"
+  when: ansible_os_family == "RedHat"
+
+- name: Download Nessus agent DEB (Debian/Ubuntu)
+  ansible.builtin.get_url:
+    url: "{{ tenable_agent_deb_url }}"
+    dest: "{{ tenable_download_dir }}/nessus-agent.deb"
+    mode: "0644"
+  when: ansible_os_family == "Debian"
+
+- name: Install Nessus agent RPM (EL)
+  ansible.builtin.dnf:
+    name: "{{ tenable_download_dir }}/nessus-agent.rpm"
+    state: present
+    disable_gpg_check: false
+  when: ansible_os_family == "RedHat"
+
+- name: Install Nessus agent DEB (Debian/Ubuntu)
+  ansible.builtin.apt:
+    deb: "{{ tenable_download_dir }}/nessus-agent.deb"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Check if agent is already linked
+  ansible.builtin.command:
+    cmd: /opt/nessus_agent/sbin/nessuscli agent status
+  register: tenable_agent_status
+  changed_when: false
+  failed_when: false
+
+- name: Link Nessus agent to Tenable manager
+  ansible.builtin.command:
+    cmd: >
+      /opt/nessus_agent/sbin/nessuscli agent link
+      --key="{{ tenable_linking_key }}"
+      --host="{{ tenable_manager_host }}"
+      --port="{{ tenable_manager_port }}"
+      --groups="{{ tenable_agent_group }}"
+  when: "'Linked to' not in tenable_agent_status.stdout"
+  no_log: true   # Don't log the linking key
+
+- name: Ensure nessusagent service is started and enabled
+  ansible.builtin.service:
+    name: nessusagent
+    state: started
+    enabled: true

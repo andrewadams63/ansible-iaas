@@ -1,0 +1,25 @@
+---
+- name: Download Nessus agent MSI
+  ansible.windows.win_get_url:
+    url: "{{ tenable_agent_win_url }}"
+    dest: "C:\\Windows\\Temp\\nessus-agent.msi"
+
+- name: Install Nessus agent via MSI
+  ansible.windows.win_package:
+    path: "C:\\Windows\\Temp\\nessus-agent.msi"
+    state: present
+
+- name: Link agent to Tenable manager
+  ansible.windows.win_command: >
+    "C:\Program Files\Tenable\Nessus Agent\nessuscli.exe" agent link
+    --key="{{ tenable_linking_key }}"
+    --host="{{ tenable_manager_host }}"
+    --port="{{ tenable_manager_port }}"
+    --groups="{{ tenable_agent_group }}"
+  no_log: true
+
+- name: Ensure Tenable Agent service is running
+  ansible.windows.win_service:
+    name: "Tenable Nessus Agent"
+    state: started
+    start_mode: auto

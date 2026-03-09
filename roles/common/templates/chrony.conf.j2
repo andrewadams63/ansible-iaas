@@ -1,0 +1,11 @@
+# Managed by Ansible — do not edit manually
+# Role: common | Template: chrony.conf.j2
+
+{% for server in ntp_servers %}
+pool {{ server }} iburst
+{% endfor %}
+
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+logdir /var/log/chrony

@@ -1,0 +1,9 @@
+# Managed by Ansible — do not edit manually
+[Resolve]
+DNS={{ dns_servers | join(' ') }}
+{% if dns_search_domains %}
+Domains={{ dns_search_domains | join(' ') }}
+{% endif %}
+DNSSEC=allow-downgrade
+DNSOverTLS=opportunistic
+Cache=yes

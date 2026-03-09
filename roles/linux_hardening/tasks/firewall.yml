@@ -1,0 +1,43 @@
+---
+- name: Ensure firewalld is installed (EL)
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure ufw is installed (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Enable and start firewalld (EL)
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: ansible_os_family == "RedHat"
+
+- name: Allow defined TCP ports through firewalld (EL)
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ firewall_allowed_tcp_ports }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Set UFW default deny incoming (Debian/Ubuntu)
+  community.general.ufw:
+    state: enabled
+    direction: incoming
+    policy: deny
+  when: ansible_os_family == "Debian"
+
+- name: Allow defined TCP ports through UFW (Debian/Ubuntu)
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ firewall_allowed_tcp_ports }}"
+  when: ansible_os_family == "Debian"

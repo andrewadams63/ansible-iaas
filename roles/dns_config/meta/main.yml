@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  role_name: dns_config
+  author: platform-team
+  description: Configure DNS resolvers and search domains via systemd-resolved or resolv.conf.
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions: [8, 9]
+    - name: Ubuntu
+      versions: [20, 22, 24]
+    - name: Windows
+      versions: [all]
+
+dependencies: []

@@ -1,0 +1,12 @@
+---
+# Variables that apply to all Linux hosts in development.
+ansible_user: ansible
+ansible_become: true
+
+# Package manager preferences
+common_packages_extra: []  # Override per-host to add extras
+
+# Auditd log retention (days) — less strict in dev
+auditd_log_max_file_action: rotate
+auditd_max_log_file: 8
+auditd_num_logs: 5

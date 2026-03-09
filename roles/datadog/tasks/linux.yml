@@ -1,0 +1,41 @@
+---
+- name: Add Datadog APT repository (Debian/Ubuntu)
+  ansible.builtin.deb822_repository:
+    name: datadog
+    types: deb
+    uris: "https://apt.datadoghq.com/"
+    suites: stable
+    components: "{{ datadog_agent_major_version }}"
+    signed_by: "https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add Datadog YUM repository (EL)
+  ansible.builtin.yum_repository:
+    name: datadog
+    description: "Datadog Agent {{ datadog_agent_major_version }}"
+    baseurl: "https://yum.datadoghq.com/stable/{{ datadog_agent_major_version }}/x86_64/"
+    gpgcheck: true
+    gpgkey: "https://keys.datadoghq.com/DATADOG_RPM_KEY_CURRENT.public"
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Install datadog-agent package
+  ansible.builtin.package:
+    name: datadog-agent
+    state: present
+
+- name: Write datadog.yaml config
+  ansible.builtin.template:
+    src: datadog.yaml.j2
+    dest: /etc/datadog-agent/datadog.yaml
+    owner: dd-agent
+    group: dd-agent
+    mode: "0640"
+  notify: Restart datadog-agent
+
+- name: Ensure datadog-agent is enabled and running
+  ansible.builtin.service:
+    name: datadog-agent
+    state: started
+    enabled: true

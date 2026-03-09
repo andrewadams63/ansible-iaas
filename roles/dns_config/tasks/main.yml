@@ -1,0 +1,19 @@
+---
+- name: Configure DNS (Linux — systemd-resolved)
+  ansible.builtin.import_tasks: linux_resolved.yml
+  when:
+    - ansible_os_family in ['RedHat', 'Debian']
+    - dns_resolver_method == 'resolved'
+  tags: [dns]
+
+- name: Configure DNS (Linux — resolv.conf)
+  ansible.builtin.import_tasks: linux_resolvconf.yml
+  when:
+    - ansible_os_family in ['RedHat', 'Debian']
+    - dns_resolver_method == 'resolvconf'
+  tags: [dns]
+
+- name: Configure DNS (Windows)
+  ansible.builtin.import_tasks: windows.yml
+  when: ansible_os_family == 'Windows'
+  tags: [dns]

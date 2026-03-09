@@ -1,0 +1,27 @@
+---
+- name: Ensure systemd-resolved is installed
+  ansible.builtin.package:
+    name: systemd-resolved
+    state: present
+
+- name: Configure systemd-resolved
+  ansible.builtin.template:
+    src: resolved.conf.j2
+    dest: /etc/systemd/resolved.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart systemd-resolved
+
+- name: Ensure systemd-resolved is enabled
+  ansible.builtin.service:
+    name: systemd-resolved
+    state: started
+    enabled: true
+
+- name: Point /etc/resolv.conf at systemd-resolved stub
+  ansible.builtin.file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true

@@ -1,0 +1,24 @@
+---
+# Pin collection versions for reproducible runs.
+# Update versions deliberately after testing; don't use latest in production.
+#
+# Install with: ansible-galaxy collection install -r collections/requirements.yml -p collections/
+collections:
+  # Core OS management (file, service, user, mount modules)
+  - name: ansible.posix
+    version: ">=1.5.4"
+
+  # Broad utility modules (ini_file, json_query, etc.)
+  - name: community.general
+    version: ">=9.0.0"
+
+  # Windows management (needed for MS Defender / Windows targets)
+  - name: ansible.windows
+    version: ">=2.3.0"
+
+  - name: community.windows
+    version: ">=2.2.0"
+
+  # Crypto helpers (certificate management, vault interactions)
+  - name: community.crypto
+    version: ">=2.20.0"

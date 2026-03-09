@@ -1,0 +1,10 @@
+---
+# monitoring.yml — Install/update Datadog agent only.
+# Useful for rolling out agent config changes without a full site run.
+
+- name: Deploy Datadog agent
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: datadog
+      tags: [datadog]

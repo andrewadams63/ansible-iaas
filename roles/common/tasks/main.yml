@@ -1,0 +1,73 @@
+---
+- name: Set system timezone
+  community.general.timezone:
+    name: "{{ common_timezone }}"
+  tags: [common, timezone]
+
+- name: Install baseline packages (RHEL/CentOS/Rocky)
+  ansible.builtin.dnf:
+    name: "{{ common_packages + common_packages_extra }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+  tags: [common, packages]
+
+- name: Install baseline packages (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: "{{ (common_packages | reject('equalto', 'bind-utils') | list) + ['dnsutils'] + common_packages_extra }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+  tags: [common, packages]
+
+- name: Configure NTP (chrony)
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony
+  tags: [common, ntp]
+
+- name: Ensure chrony is enabled and running
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+  when: ansible_os_family == "RedHat"
+  tags: [common, ntp]
+
+- name: Ensure chrony is enabled and running (Debian)
+  ansible.builtin.service:
+    name: chrony
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian"
+  tags: [common, ntp]
+
+- name: Apply sysctl hardening settings
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.d/90-ansible-baseline.conf
+  loop: "{{ common_sysctl_settings | dict2items }}"
+  tags: [common, sysctl]
+
+- name: Write MOTD
+  ansible.builtin.template:
+    src: motd.j2
+    dest: "{{ common_motd_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [common, motd]
+
+- name: Ensure rsyslog is enabled
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true
+  tags: [common, logging]

@@ -1,0 +1,20 @@
+---
+- name: Download Datadog agent installer
+  ansible.windows.win_get_url:
+    url: "https://s3.amazonaws.com/ddagent-windows-stable/datadog-agent-7-latest.amd64.msi"
+    dest: "C:\\Windows\\Temp\\datadog-agent.msi"
+
+- name: Install Datadog agent via MSI
+  ansible.windows.win_package:
+    path: "C:\\Windows\\Temp\\datadog-agent.msi"
+    state: present
+    arguments: >
+      APIKEY="{{ datadog_api_key }}"
+      SITE="{{ datadog_site }}"
+      TAGS="{{ datadog_tags | join(',') }}"
+
+- name: Ensure Datadog agent service is running
+  ansible.windows.win_service:
+    name: datadogagent
+    state: started
+    start_mode: auto

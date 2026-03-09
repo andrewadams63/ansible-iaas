@@ -1,0 +1,19 @@
+---
+# MDE onboarding package — download from Microsoft 365 Defender portal
+# and place in roles/ms_defender/files/ (or reference a secure artifact store)
+mde_onboarding_script_linux: "MicrosoftDefenderATPOnboardingLinuxServer.py"
+mde_onboarding_script_windows: "WindowsDefenderATPOnboardingPackage.zip"
+
+# mdatp channel: prod (default), insiders-slow, insiders-fast
+mde_channel: prod
+
+# Real-time protection
+mde_realtime_protection: true
+
+# Cloud-delivered protection (recommended)
+mde_cloud_protection: true
+
+# Exclusions — add paths that generate false positives
+mde_exclusions_paths: []
+mde_exclusions_extensions: []
+mde_exclusions_processes: []

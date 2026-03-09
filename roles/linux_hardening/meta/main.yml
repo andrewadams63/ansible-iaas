@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: linux_hardening
+  author: platform-team
+  description: >
+    CIS-aligned Linux hardening: SSH, firewall, auditd, kernel params,
+    filesystem mounts, password policy, and service minimization.
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions: [8, 9]
+    - name: Ubuntu
+      versions: [20, 22, 24]
+
+dependencies:
+  - role: common

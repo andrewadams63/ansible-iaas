@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  role_name: tenable_agent
+  author: platform-team
+  description: Install and link the Tenable Nessus agent.
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions: [8, 9]
+    - name: Ubuntu
+      versions: [20, 22, 24]
+    - name: Windows
+      versions: [all]
+
+dependencies: []

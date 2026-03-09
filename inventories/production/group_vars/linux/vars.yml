@@ -1,0 +1,7 @@
+---
+ansible_user: ansible
+ansible_become: true
+
+auditd_log_max_file_action: rotate
+auditd_max_log_file: 8
+auditd_num_logs: 10   # Keep more logs in production

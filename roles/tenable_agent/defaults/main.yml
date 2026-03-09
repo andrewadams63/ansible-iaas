@@ -1,0 +1,16 @@
+---
+# Required — set via vault in group_vars/all/vars.yml
+# tenable_linking_key: "{{ vault_tenable_linking_key }}"
+
+tenable_manager_host: "cloud.tenable.com"
+tenable_manager_port: 443
+tenable_agent_group: "default"
+
+# Package download base URL — update version to pin a release
+# See: https://www.tenable.com/downloads/nessus-agents
+tenable_agent_version: "10.7.3"
+tenable_agent_rpm_url: "https://www.tenable.com/downloads/api/v2/pages/nessus-agents/files/NessusAgent-{{ tenable_agent_version }}-el9.x86_64.rpm"
+tenable_agent_deb_url: "https://www.tenable.com/downloads/api/v2/pages/nessus-agents/files/NessusAgent-{{ tenable_agent_version }}-ubuntu1404_amd64.deb"
+tenable_agent_win_url: "https://www.tenable.com/downloads/api/v2/pages/nessus-agents/files/NessusAgent-{{ tenable_agent_version }}-x64.msi"
+
+tenable_download_dir: /tmp

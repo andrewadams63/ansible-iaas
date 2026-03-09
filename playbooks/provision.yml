@@ -1,0 +1,35 @@
+---
+# provision.yml — First-boot provisioning playbook.
+#
+# Intended to be called immediately after Terraform creates machines.
+# The tf_inventory.py script generates a dynamic inventory from Terraform
+# outputs; pass it with: -i scripts/tf_inventory.py
+#
+# GitHub Actions usage:
+#   ansible-playbook playbooks/provision.yml \
+#     -i scripts/tf_inventory.py \
+#     -i inventories/production/hosts.yml \
+#     --extra-vars "env=production"
+#
+# This playbook is idempotent — safe to re-run on existing hosts.
+
+- name: Wait for new hosts to become reachable
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+        sleep: 5
+      tags: [always]
+
+- name: Gather facts after connectivity is confirmed
+  hosts: all
+  gather_facts: true
+  tasks: []
+
+- name: Provision Linux hosts
+  import_playbook: linux.yml
+
+- name: Provision Windows hosts
+  import_playbook: windows.yml

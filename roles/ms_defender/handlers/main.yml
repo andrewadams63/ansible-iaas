@@ -1,0 +1,5 @@
+---
+- name: Restart mdatp
+  ansible.builtin.service:
+    name: mdatp
+    state: restarted

@@ -1,0 +1,36 @@
+---
+# lint.yml — PR quality gate: lint and syntax-check every pull request.
+
+name: Lint & Syntax Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ansible-lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install tools
+        run: pip install ansible ansible-lint
+
+      - name: Install collections
+        run: ansible-galaxy collection install -r collections/requirements.yml -p collections/
+
+      - name: ansible-lint
+        run: ansible-lint
+
+      - name: Syntax check all playbooks
+        run: |
+          for pb in playbooks/*.yml; do
+            echo "Checking $pb..."
+            ansible-playbook "$pb" --syntax-check -i inventories/development/hosts.yml
+          done

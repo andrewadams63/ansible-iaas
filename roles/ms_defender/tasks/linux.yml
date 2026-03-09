@@ -1,0 +1,55 @@
+---
+- name: Add Microsoft packages repository (EL)
+  ansible.builtin.yum_repository:
+    name: microsoft-prod
+    description: Microsoft Production Repository
+    baseurl: "https://packages.microsoft.com/rhel/{{ ansible_distribution_major_version }}/prod/"
+    gpgcheck: true
+    gpgkey: "https://packages.microsoft.com/keys/microsoft.asc"
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Add Microsoft packages key (Debian/Ubuntu)
+  ansible.builtin.get_url:
+    url: "https://packages.microsoft.com/keys/microsoft.asc"
+    dest: /etc/apt/trusted.gpg.d/microsoft.asc
+    mode: "0644"
+  when: ansible_os_family == "Debian"
+
+- name: Add Microsoft packages repository (Debian/Ubuntu)
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/{{ ansible_distribution_version }}/{{ mde_channel }} {{ ansible_distribution_release }} main"
+    state: present
+    filename: microsoft-prod
+  when: ansible_os_family == "Debian"
+
+- name: Install mdatp
+  ansible.builtin.package:
+    name: mdatp
+    state: present
+
+- name: Copy MDE onboarding package
+  ansible.builtin.copy:
+    src: "{{ mde_onboarding_script_linux }}"
+    dest: /tmp/mdatp_onboard.py
+    mode: "0700"
+
+- name: Run onboarding script
+  ansible.builtin.command:
+    cmd: python3 /tmp/mdatp_onboard.py
+    creates: /etc/opt/microsoft/mdatp/mdatp_onboard.json
+
+- name: Apply MDE configuration
+  ansible.builtin.template:
+    src: mdatp_managed.json.j2
+    dest: /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart mdatp
+
+- name: Ensure mdatp service is enabled and running
+  ansible.builtin.service:
+    name: mdatp
+    state: started
+    enabled: true

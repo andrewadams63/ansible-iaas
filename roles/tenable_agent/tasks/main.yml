@@ -1,0 +1,10 @@
+---
+- name: Install and link Tenable agent (Linux)
+  ansible.builtin.import_tasks: linux.yml
+  when: ansible_os_family in ['RedHat', 'Debian']
+  tags: [tenable]
+
+- name: Install and link Tenable agent (Windows)
+  ansible.builtin.import_tasks: windows.yml
+  when: ansible_os_family == 'Windows'
+  tags: [tenable]

@@ -1,0 +1,22 @@
+# Managed by Ansible — do not edit manually
+# Role: datadog | Template: datadog.yaml.j2
+
+api_key: {{ datadog_api_key }}
+site: {{ datadog_site }}
+
+hostname: {{ ansible_fqdn }}
+
+tags:
+{% for tag in datadog_tags %}
+  - {{ tag }}
+{% endfor %}
+  - ansible_managed:true
+
+logs_enabled: {{ datadog_logs_enabled | lower }}
+
+process_config:
+  process_collection:
+    enabled: {{ datadog_process_agent_enabled | lower }}
+
+apm_config:
+  enabled: {{ datadog_apm_enabled | lower }}

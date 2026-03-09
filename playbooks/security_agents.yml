@@ -1,0 +1,13 @@
+---
+# security_agents.yml — Install/update Tenable and MDE only.
+# Tag with --tags tenable or --tags mde to run a single agent.
+
+- name: Deploy security agents
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: tenable_agent
+      tags: [tenable]
+
+    - role: ms_defender
+      tags: [mde, defender]

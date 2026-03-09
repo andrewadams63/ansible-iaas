@@ -1,0 +1,31 @@
+---
+- name: Install auditd
+  ansible.builtin.package:
+    name:
+      - audit
+      - audispd-plugins
+    state: present
+
+- name: Configure auditd.conf
+  ansible.builtin.template:
+    src: auditd.conf.j2
+    dest: /etc/audit/auditd.conf
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Restart auditd
+
+- name: Deploy CIS audit rules
+  ansible.builtin.copy:
+    src: audit.rules
+    dest: /etc/audit/rules.d/99-ansible-cis.rules
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Restart auditd
+
+- name: Ensure auditd is enabled and running
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: true

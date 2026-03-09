@@ -1,0 +1,10 @@
+---
+- name: Install MDE (Linux)
+  ansible.builtin.import_tasks: linux.yml
+  when: ansible_os_family in ['RedHat', 'Debian']
+  tags: [mde, defender]
+
+- name: Configure MDE (Windows)
+  ansible.builtin.import_tasks: windows.yml
+  when: ansible_os_family == 'Windows'
+  tags: [mde, defender]

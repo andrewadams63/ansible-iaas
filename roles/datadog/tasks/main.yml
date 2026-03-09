@@ -1,0 +1,10 @@
+---
+- name: Install Datadog agent (Linux)
+  ansible.builtin.import_tasks: linux.yml
+  when: ansible_os_family in ['RedHat', 'Debian']
+  tags: [datadog]
+
+- name: Install Datadog agent (Windows)
+  ansible.builtin.import_tasks: windows.yml
+  when: ansible_os_family == 'Windows'
+  tags: [datadog]

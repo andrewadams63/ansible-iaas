@@ -1,0 +1,175 @@
+---
+# configure.yml — Ongoing configuration management workflow.
+#
+# Runs on a schedule (daily drift detection) and on push to main.
+# This is the "config management" counterpart to provision.yml — it keeps
+# existing machines converged against the desired state defined in this repo.
+
+name: Configuration Management
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "roles/**"
+      - "playbooks/**"
+      - "inventories/**"
+      - "collections/requirements.yml"
+
+  schedule:
+    - cron: "0 6 * * *"   # Daily at 06:00 UTC — drift detection
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: development
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      playbook:
+        description: "Playbook to run"
+        required: true
+        default: site.yml
+        type: choice
+        options:
+          - site.yml
+          - hardening.yml
+          - monitoring.yml
+          - security_agents.yml
+      tags:
+        description: "Ansible tags (comma-separated, leave blank for all)"
+        required: false
+        default: ""
+      limit:
+        description: "Limit to host/group"
+        required: false
+        default: "all"
+      check_mode:
+        description: "Dry run"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+env:
+  ANSIBLE_FORCE_COLOR: "1"
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install ansible-lint
+      - run: ansible-lint playbooks/
+
+  configure-development:
+    name: Configure — development
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'development') || github.event_name == 'schedule'
+    environment: development
+    concurrency:
+      group: ansible-development
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install ansible && ansible-galaxy collection install -r collections/requirements.yml -p collections/
+      - run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+
+      - name: Run playbook
+        run: |
+          PLAYBOOK="${{ inputs.playbook || 'site.yml' }}"
+          ARGS="playbooks/$PLAYBOOK -i inventories/development/hosts.yml"
+          [ -n "${{ inputs.tags }}" ] && ARGS="$ARGS --tags ${{ inputs.tags }}"
+          [ -n "${{ inputs.limit }}" ] && [ "${{ inputs.limit }}" != "all" ] && ARGS="$ARGS -l ${{ inputs.limit }}"
+          [ "${{ inputs.check_mode }}" = "true" ] && ARGS="$ARGS --check --diff"
+          ansible-playbook $ARGS
+
+      - if: always()
+        run: rm -f .vault_pass
+
+  configure-staging:
+    name: Configure — staging
+    runs-on: ubuntu-latest
+    needs: configure-development
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+    environment: staging
+    concurrency:
+      group: ansible-staging
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install ansible && ansible-galaxy collection install -r collections/requirements.yml -p collections/
+      - run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+
+      - name: Run playbook
+        run: |
+          PLAYBOOK="${{ inputs.playbook || 'site.yml' }}"
+          ARGS="playbooks/$PLAYBOOK -i inventories/staging/hosts.yml"
+          [ -n "${{ inputs.tags }}" ] && ARGS="$ARGS --tags ${{ inputs.tags }}"
+          [ "${{ inputs.check_mode }}" = "true" ] && ARGS="$ARGS --check --diff"
+          ansible-playbook $ARGS
+
+      - if: always()
+        run: rm -f .vault_pass
+
+  configure-production:
+    name: Configure — production
+    runs-on: ubuntu-latest
+    needs: configure-staging
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+    environment: production   # Requires manual approval gate in GitHub settings
+    concurrency:
+      group: ansible-production
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install ansible && ansible-galaxy collection install -r collections/requirements.yml -p collections/
+      - run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+
+      - name: Run playbook
+        run: |
+          PLAYBOOK="${{ inputs.playbook || 'site.yml' }}"
+          ARGS="playbooks/$PLAYBOOK -i inventories/production/hosts.yml"
+          [ -n "${{ inputs.tags }}" ] && ARGS="$ARGS --tags ${{ inputs.tags }}"
+          [ "${{ inputs.check_mode }}" = "true" ] && ARGS="$ARGS --check --diff"
+          ansible-playbook $ARGS
+
+      - if: always()
+        run: rm -f .vault_pass

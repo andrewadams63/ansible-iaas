@@ -1,0 +1,13 @@
+---
+# Override in group_vars/all/vars.yml per environment
+dns_servers:
+  - "1.1.1.1"
+  - "8.8.8.8"
+
+dns_search_domains: []
+
+# Linux resolver method: 'resolved' (systemd-resolved) or 'resolvconf'
+dns_resolver_method: resolved
+
+# Windows adapter name — use '*' to configure all adapters
+dns_win_adapter_name: "*"

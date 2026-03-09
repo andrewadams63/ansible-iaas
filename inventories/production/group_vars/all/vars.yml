@@ -1,0 +1,30 @@
+---
+env: production
+org_name: "acme"
+datacenter: "us-east-1"
+
+datadog_api_key: "{{ vault_datadog_api_key }}"
+datadog_site: "datadoghq.com"
+datadog_tags:
+  - "env:production"
+  - "team:platform"
+
+tenable_linking_key: "{{ vault_tenable_linking_key }}"
+tenable_manager_host: "cloud.tenable.com"
+tenable_agent_group: "production"
+
+dns_servers:
+  - "10.2.0.2"
+  - "10.2.0.3"
+dns_search_domains:
+  - "internal.acme.com"
+
+ntp_servers:
+  - "time.cloudflare.com"
+  - "time.google.com"
+
+# Production is strictest
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"
+ssh_max_auth_tries: 3
+ssh_allowed_users: "ansible"

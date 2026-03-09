@@ -1,0 +1,29 @@
+---
+- name: Ensure Windows Defender is enabled
+  ansible.windows.win_optional_feature:
+    name: Windows-Defender
+    state: present
+
+- name: Enable real-time protection via PowerShell
+  ansible.windows.win_powershell:
+    script: |
+      Set-MpPreference -DisableRealtimeMonitoring ${{ not mde_realtime_protection }}
+    error_action: stop
+
+- name: Enable cloud-delivered protection
+  ansible.windows.win_powershell:
+    script: |
+      Set-MpPreference -MAPSReporting {{ '2' if mde_cloud_protection else '0' }}
+    error_action: stop
+
+- name: Add exclusion paths
+  ansible.windows.win_powershell:
+    script: |
+      Add-MpPreference -ExclusionPath "{{ item }}"
+  loop: "{{ mde_exclusions_paths }}"
+  when: mde_exclusions_paths | length > 0
+
+- name: Run Windows Defender quick scan
+  ansible.windows.win_powershell:
+    script: Start-MpScan -ScanType QuickScan
+  changed_when: false

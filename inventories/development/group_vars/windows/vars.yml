@@ -1,0 +1,8 @@
+---
+# Variables that apply to all Windows hosts in development.
+ansible_user: "{{ vault_win_ansible_user }}"
+ansible_password: "{{ vault_win_ansible_password }}"
+ansible_connection: winrm
+ansible_winrm_transport: kerberos   # Use ntlm for local testing without AD
+ansible_winrm_server_cert_validation: ignore   # Change to 'validate' in production
+ansible_port: 5985

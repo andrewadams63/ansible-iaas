@@ -1,0 +1,5 @@
+---
+- name: Set DNS servers on Windows adapters
+  ansible.windows.win_dns_client:
+    adapter_names: "{{ dns_win_adapter_name }}"
+    ipv4_addresses: "{{ dns_servers }}"

@@ -1,0 +1,43 @@
+---
+# Variables for ALL hosts in the development environment.
+# These override role defaults but are overridden by host_vars.
+#
+# Secrets live in vault.yml in this same directory.
+# Reference them here as: my_var: "{{ vault_my_var }}"
+
+# ── Environment metadata ───────────────────────────────────────────────────
+env: development
+org_name: "acme"
+datacenter: "us-east-1"
+
+# ── Datadog ────────────────────────────────────────────────────────────────
+datadog_api_key: "{{ vault_datadog_api_key }}"
+datadog_site: "datadoghq.com"
+datadog_tags:
+  - "env:development"
+  - "team:platform"
+
+# ── Tenable (Nessus) agent ─────────────────────────────────────────────────
+tenable_linking_key: "{{ vault_tenable_linking_key }}"
+tenable_manager_host: "cloud.tenable.com"
+tenable_agent_group: "development"
+
+# ── DNS ────────────────────────────────────────────────────────────────────
+dns_servers:
+  - "10.0.0.2"
+  - "10.0.0.3"
+dns_search_domains:
+  - "dev.internal.acme.com"
+  - "internal.acme.com"
+
+# ── NTP ────────────────────────────────────────────────────────────────────
+ntp_servers:
+  - "time.cloudflare.com"
+  - "time.google.com"
+
+# ── SSH hardening ──────────────────────────────────────────────────────────
+# Less restrictive in dev to ease debugging
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"
+ssh_max_auth_tries: 6
+ssh_allowed_users: "ansible"

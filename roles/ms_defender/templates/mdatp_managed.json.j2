@@ -1,0 +1,17 @@
+{
+    "antivirusEngine": {
+        "enforcementLevel": "real_time",
+        "enableRealTimeProtection": {{ mde_realtime_protection | lower }},
+        "exclusions": [
+{% for path in mde_exclusions_paths %}
+            {"$type": "excludedPath", "isDirectory": false, "path": "{{ path }}"}{{ "," if not loop.last else "" }}
+{% endfor %}
+        ],
+        "exclusionsMergePolicy": "merge"
+    },
+    "cloudService": {
+        "enabled": {{ mde_cloud_protection | lower }},
+        "diagnosticLevel": "optional",
+        "automaticSampleSubmissionConsent": "safe"
+    }
+}

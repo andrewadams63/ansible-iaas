@@ -1,0 +1,25 @@
+---
+# Required — set via vault in group_vars/all/vars.yml
+# datadog_api_key: "{{ vault_datadog_api_key }}"
+
+datadog_site: "datadoghq.com"
+datadog_agent_major_version: 7
+
+datadog_tags: []
+
+# Integrations to enable — list of config dicts passed to datadog.conf
+datadog_checks: {}
+
+# Process monitoring
+datadog_process_agent_enabled: true
+
+# APM
+datadog_apm_enabled: false
+
+# Log collection
+datadog_logs_enabled: true
+datadog_logs_config_container_collect_all: false
+
+# Windows-specific
+datadog_windows_ddagentuser_name: ""
+datadog_windows_ddagentuser_password: ""

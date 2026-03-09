@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: common
+  author: platform-team
+  description: >
+    Baseline configuration applied to every managed host: packages, users,
+    NTP, motd, and audit logging bootstrap.
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions: [8, 9]
+    - name: Ubuntu
+      versions: [20, 22, 24]
+  categories: []
+
+dependencies: []

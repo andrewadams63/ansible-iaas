@@ -1,0 +1,29 @@
+---
+- name: Include SSH hardening tasks
+  ansible.builtin.import_tasks: ssh.yml
+  tags: [hardening, ssh]
+
+- name: Include firewall tasks
+  ansible.builtin.import_tasks: firewall.yml
+  tags: [hardening, firewall]
+
+- name: Include auditd tasks
+  ansible.builtin.import_tasks: auditd.yml
+  tags: [hardening, auditd]
+
+- name: Include password policy tasks
+  ansible.builtin.import_tasks: password_policy.yml
+  tags: [hardening, password]
+
+- name: Include service minimization tasks
+  ansible.builtin.import_tasks: services.yml
+  tags: [hardening, services]
+
+- name: Set default umask in /etc/profile.d
+  ansible.builtin.copy:
+    dest: /etc/profile.d/umask.sh
+    content: "umask {{ common_umask }}\n"
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [hardening, umask]

@@ -1,0 +1,44 @@
+---
+# Defaults for the common role.  Override in group_vars or host_vars.
+
+# Packages to ensure are present on every Linux host
+common_packages:
+  - vim
+  - curl
+  - wget
+  - unzip
+  - tar
+  - lsof
+  - net-tools
+  - bind-utils      # dig/nslookup — EL; ubuntu: dnsutils
+  - bash-completion
+  - chrony          # NTP — ubuntu uses chrony too since 20.04
+  - rsyslog
+
+# Additional packages that groups/hosts can append to without overriding the base list
+common_packages_extra: []
+
+# NTP servers (override in group_vars/all/vars.yml per environment)
+ntp_servers:
+  - "time.cloudflare.com"
+  - "time.google.com"
+
+# MOTD path
+common_motd_path: /etc/motd
+
+# Ansible service account
+ansible_service_account: ansible
+
+# Timezone
+common_timezone: "UTC"
+
+# Sysctl tuning — safe baseline
+common_sysctl_settings:
+  net.ipv4.tcp_syncookies: 1
+  net.ipv4.conf.all.rp_filter: 1
+  net.ipv4.conf.default.rp_filter: 1
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.default.accept_redirects: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv6.conf.all.accept_redirects: 0
+  kernel.dmesg_restrict: 1

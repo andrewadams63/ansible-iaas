@@ -1,0 +1,20 @@
+---
+# windows.yml — All Windows hosts.
+
+- name: Windows baseline configuration
+  hosts: windows
+  gather_facts: true
+  any_errors_fatal: false
+
+  roles:
+    - role: dns_config
+      tags: [dns]
+
+    - role: datadog
+      tags: [datadog, monitoring]
+
+    - role: tenable_agent
+      tags: [tenable, security]
+
+    - role: ms_defender
+      tags: [mde, defender, security]

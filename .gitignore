@@ -1,0 +1,44 @@
+# Vault password files — NEVER commit these
+.vault_pass
+.vault_pass.*
+*.vault_pass
+
+# Ansible retry files
+*.retry
+
+# Fact cache
+/tmp/ansible_facts_cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Molecule test artifacts
+molecule/.cache/
+.molecule/
+
+# Collections installed locally
+collections/ansible_collections/
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+
+# Terraform inventory output (generated, not committed)
+inventories/*/tf_hosts.yml
+
+# Claude Code memory / project context (stored outside repo but excluded as precaution)
+.claude/

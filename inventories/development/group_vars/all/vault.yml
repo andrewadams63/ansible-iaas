@@ -1,0 +1,12 @@
+---
+# THIS FILE MUST BE ANSIBLE-VAULT ENCRYPTED BEFORE COMMITTING.
+#
+# Encrypt:   ansible-vault encrypt inventories/development/group_vars/all/vault.yml
+# Edit:      ansible-vault edit    inventories/development/group_vars/all/vault.yml
+# View:      ansible-vault view    inventories/development/group_vars/all/vault.yml
+#
+# Convention: vault variables are prefixed with vault_ and referenced in vars.yml
+# so that the variable name (but not the value) is visible in plain text.
+
+vault_datadog_api_key: "REPLACE_ME"
+vault_tenable_linking_key: "REPLACE_ME"

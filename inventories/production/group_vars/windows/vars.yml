@@ -1,0 +1,7 @@
+---
+ansible_user: "{{ vault_win_ansible_user }}"
+ansible_password: "{{ vault_win_ansible_password }}"
+ansible_connection: winrm
+ansible_winrm_transport: kerberos
+ansible_winrm_server_cert_validation: validate
+ansible_port: 5986   # HTTPS in production

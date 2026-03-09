@@ -1,0 +1,8 @@
+# Managed by Ansible — do not edit manually
+{% if dns_search_domains %}
+search {{ dns_search_domains | join(' ') }}
+{% endif %}
+{% for server in dns_servers %}
+nameserver {{ server }}
+{% endfor %}
+options timeout:2 attempts:3

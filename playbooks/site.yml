@@ -1,0 +1,16 @@
+---
+# site.yml — Master playbook.  Applies the full desired state to all hosts.
+#
+# Usage:
+#   Full run:         ansible-playbook playbooks/site.yml
+#   Check mode:       ansible-playbook playbooks/site.yml --check --diff
+#   Single host:      ansible-playbook playbooks/site.yml -l hostname
+#   Single tag:       ansible-playbook playbooks/site.yml --tags datadog
+#   Skip a tag:       ansible-playbook playbooks/site.yml --skip-tags hardening
+#   Specific env:     ansible-playbook playbooks/site.yml -i inventories/production/hosts.yml
+
+- name: Apply baseline and hardening to all Linux hosts
+  import_playbook: linux.yml
+
+- name: Apply baseline configuration to all Windows hosts
+  import_playbook: windows.yml
